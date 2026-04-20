@@ -204,6 +204,20 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  Future<bool> deleteAccount(String password, String confirmation) async {
+    _setState(AuthState.loading);
+    try {
+      await _repository.deleteAccount(password, confirmation);
+      _currentUser = null;
+      _setState(AuthState.idle);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _setState(AuthState.error);
+      return false;
+    }
+  }
+
   void _setState(AuthState newState) {
     _state = newState;
     notifyListeners();

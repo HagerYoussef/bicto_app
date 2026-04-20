@@ -16,6 +16,7 @@ abstract class AuthRemoteDataSource {
   Future<void> sendPasswordOtp(String email);
   Future<void> verifyPasswordOtp(String email, String code);
   Future<void> resetPassword(String email, String code, String password, String passwordConfirmation);
+  Future<void> deleteAccount(String password, String confirmation);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -142,6 +143,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'otp_code': code,
         'password': password,
         'password_confirmation': passwordConfirmation,
+      });
+    } catch (e) {
+      throw ErrorHandler.handle(e);
+    }
+  }
+
+  @override
+  Future<void> deleteAccount(String password, String confirmation) async {
+    try {
+      await _dio.post(ApiConstants.deleteAccount, data: {
+        'password': password,
+        'confirmation': confirmation,
       });
     } catch (e) {
       throw ErrorHandler.handle(e);

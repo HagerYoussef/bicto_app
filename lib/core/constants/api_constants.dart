@@ -17,6 +17,7 @@ class ApiConstants {
   static const String passwordOtp = "/api/auth/password/otp";
   static const String passwordOtpVerify = "/api/auth/password/otp/verify";
   static const String passwordReset = "/api/auth/password/reset";
+  static const String deleteAccount = "/api/auth/delete-account";
 
   // Student
   static const String studentDashboard = "/api/student/dashboard";
