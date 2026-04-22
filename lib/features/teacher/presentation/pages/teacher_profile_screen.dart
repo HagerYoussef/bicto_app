@@ -335,34 +335,36 @@ class TeacherProfileScreen extends StatelessWidget {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
           title: const Text('حذف الحساب', textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('هل أنت متأكد أنك تريد حذف حسابك؟ هذا الإجراء لا يمكن التراجع عنه.', textAlign: TextAlign.center),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'كلمة المرور الحالية',
-                    prefixIcon: Icon(LucideIcons.lock),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('هل أنت متأكد أنك تريد حذف حسابك؟ هذا الإجراء لا يمكن التراجع عنه.', textAlign: TextAlign.center),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'كلمة المرور الحالية',
+                      prefixIcon: Icon(LucideIcons.lock),
+                    ),
+                    validator: (v) => v == null || v.isEmpty ? 'يرجى إدخال كلمة المرور' : null,
                   ),
-                  validator: (v) => v == null || v.isEmpty ? 'يرجى إدخال كلمة المرور' : null,
-                ),
-                const SizedBox(height: 16),
-                const Text('لتأكيد الحذف، يرجى كتابة كلمة "DELETE" بالأسفل:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: confirmController,
-                  decoration: const InputDecoration(
-                    hintText: 'DELETE',
-                    border: OutlineInputBorder(),
+                  const SizedBox(height: 16),
+                  const Text('لتأكيد الحذف، يرجى كتابة كلمة "DELETE" بالأسفل:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: confirmController,
+                    decoration: const InputDecoration(
+                      hintText: 'DELETE',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (v) => v != 'DELETE' ? 'كلمة التأكيد غير صحيحة' : null,
                   ),
-                  validator: (v) => v != 'DELETE' ? 'كلمة التأكيد غير صحيحة' : null,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           actions: [

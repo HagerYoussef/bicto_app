@@ -21,34 +21,55 @@ class _LandingScreenState extends State<LandingScreen> {
     final authVm = context.read<AuthViewModel>();
     final storage = await StorageService.getInstance();
     
-    // Wait for the current user to be loaded from storage/API
-    await authVm.loadCurrentUser();
-    
     if (!mounted) return;
 
-    if (authVm.currentUser == null) {
-      // Fallback: Check if we have a stored role and token to stay logged in
-      final storedRole = storage.getRole();
-      
-      if (storedRole != null && storage.isLoggedIn) {
-        if (storedRole == 'teacher') {
-          Navigator.pushReplacementNamed(context, '/teacher-dashboard');
-        } else {
-          Navigator.pushReplacementNamed(context, '/student-main');
-        }
-        return;
+    // 1. Immediate Navigation check via SharedPreferences
+    String? storedRole = storage.getRole();
+    bool hasTeacherToken = storage.getToken(role: 'teacher') != null;
+    bool hasStudentToken = storage.getToken(role: 'student') != null;
+
+    if (storage.isLoggedIn || hasTeacherToken || hasStudentToken) {
+      // If we have a teacher token but role says student, something is wrong, trust the token
+      if (hasTeacherToken && (storedRole == null || storedRole == 'student')) {
+        storedRole = 'teacher';
+        await storage.saveRole('teacher');
+      } else if (hasStudentToken && storedRole == null) {
+        storedRole = 'student';
+        await storage.saveRole('student');
       }
 
-      Navigator.pushReplacementNamed(context, '/login');
+      if (storedRole == 'teacher') {
+        Navigator.pushReplacementNamed(context, '/teacher-dashboard');
+      } else if (storedRole == 'student') {
+        Navigator.pushReplacementNamed(context, '/student-main');
+      } else {
+        // Fallback if role is still unknown but we have a token
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+      
+      // Load user data in background to refresh UI later
+      authVm.loadCurrentUser();
       return;
     }
 
-    // Role-safe navigation based on the user model returned from API
-    if (authVm.currentUser!.role == 'teacher') {
-      Navigator.pushReplacementNamed(context, '/teacher-dashboard');
-    } else {
-      Navigator.pushReplacementNamed(context, '/student-main');
+    // 2. If not logged in locally, try to load from API (maybe session still valid but role cleared)
+    // or just go to login if no role is found.
+    if (storage.isLoggedIn) {
+       await authVm.loadCurrentUser();
+       if (!mounted) return;
+       
+       if (authVm.currentUser != null) {
+          if (authVm.currentUser!.role == 'teacher') {
+            Navigator.pushReplacementNamed(context, '/teacher-dashboard');
+          } else {
+            Navigator.pushReplacementNamed(context, '/student-main');
+          }
+          return;
+       }
     }
+
+    // Default to login if all else fails
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override

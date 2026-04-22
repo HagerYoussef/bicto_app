@@ -10,7 +10,7 @@ abstract class AuthRemoteDataSource {
   Future<void> register(RegisterRequest request);
   Future<AuthResponse> verifyOtp(String email, String otpCode);
   Future<void> resendOtp(String email);
-  Future<UserModel> getMe();
+  Future<UserModel> getMe({String? role});
   Future<void> logout();
   Future<List<GradeModel>> getGrades();
   Future<void> sendPasswordOtp(String email);
@@ -84,10 +84,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> getMe() async {
+  Future<UserModel> getMe({String? role}) async {
     try {
-      final response = await _dio.get(ApiConstants.me);
-      return UserModel.fromJson(response.data['user'] ?? response.data);
+      final endpoint = role == 'teacher' ? ApiConstants.teacherProfile : ApiConstants.me;
+      final response = await _dio.get(endpoint);
+      final data = response.data['user'] ?? response.data['data'] ?? response.data;
+      return UserModel.fromJson(data);
     } catch (e) {
       throw ErrorHandler.handle(e);
     }
@@ -152,7 +154,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> deleteAccount(String password, String confirmation) async {
     try {
-      await _dio.post(ApiConstants.deleteAccount, data: {
+      await _dio.delete(ApiConstants.deleteAccount, data: {
         'password': password,
         'confirmation': confirmation,
       });

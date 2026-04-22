@@ -51,6 +51,16 @@ class TeacherSettingsScreen extends StatelessWidget {
             FadeInDown(
               delay: const Duration(milliseconds: 500),
               child: _buildSettingsTile(
+                LucideIcons.userX, 
+                'حذف الحساب', 
+                () => _showDeleteAccountDialog(context),
+                isDestructive: true,
+              ),
+            ),
+            const SizedBox(height: 12),
+            FadeInDown(
+              delay: const Duration(milliseconds: 600),
+              child: _buildSettingsTile(
                 LucideIcons.logOut, 
                 'تسجيل الخروج', 
                 () async {
@@ -69,6 +79,82 @@ class TeacherSettingsScreen extends StatelessWidget {
                 'الإصدار 1.0.0',
                 style: TextStyle(color: Colors.grey[400], fontSize: 12),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    final authVm = context.read<AuthViewModel>();
+    final passwordController = TextEditingController();
+    final confirmController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('حذف الحساب', textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('هل أنت متأكد أنك تريد حذف حسابك؟ هذا الإجراء لا يمكن التراجع عنه.', textAlign: TextAlign.center),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'كلمة المرور الحالية',
+                      prefixIcon: Icon(LucideIcons.lock),
+                    ),
+                    validator: (v) => v == null || v.isEmpty ? 'يرجى إدخال كلمة المرور' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('لتأكيد الحذف، يرجى كتابة كلمة "DELETE" بالأسفل:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: confirmController,
+                    decoration: const InputDecoration(
+                      hintText: 'DELETE',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (v) => v != 'DELETE' ? 'كلمة التأكيد غير صحيحة' : null,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('إلغاء'),
+            ),
+            ElevatedButton(
+              onPressed: authVm.isLoading ? null : () async {
+                if (formKey.currentState?.validate() ?? false) {
+                  final success = await authVm.deleteAccount(
+                    passwordController.text,
+                    confirmController.text,
+                  );
+                  if (success && context.mounted) {
+                    Navigator.pop(context);
+                    Navigator.pushNamedAndRemoveUntil(context, '/', (r) => false);
+                  } else if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(authVm.errorMessage ?? 'فشل حذف الحساب'), backgroundColor: Colors.red),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+              child: authVm.isLoading
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('تأكيد الحذف النهائي'),
             ),
           ],
         ),

@@ -153,30 +153,37 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                   children: [
                     Row(
                       children: [
-                        CircleAvatar(
-                          radius: 28,
-                          backgroundColor: Colors.white24,
-                          child: Text(
-                            user?.fullName?.substring(0, 1) ?? 'T',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+                        GestureDetector(
+                          onTap: () => Navigator.pushNamed(context, '/profile'),
+                          child: CircleAvatar(
+                            radius: 28,
+                            backgroundColor: Colors.white24,
+                            backgroundImage: user?.avatarUrl != null ? NetworkImage(user!.avatarUrl!) : null,
+                            child: user?.avatarUrl == null ? Text(
+                              user?.fullName?.substring(0, 1) ?? 'T',
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+                            ) : null,
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'أهلاً بك،',
-                                style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
-                              ),
-                              Text(
-                                user?.fullName ?? 'المدرس',
-                                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                          child: GestureDetector(
+                            onTap: () => Navigator.pushNamed(context, '/profile'),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'أهلاً بك،',
+                                  style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
+                                ),
+                                Text(
+                                  user?.fullName ?? 'المدرس',
+                                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         Container(
@@ -665,9 +672,9 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
       children: [
         _quickActionCard(theme, 'إضافة حصة', LucideIcons.plusCircle, Colors.blue, () => Navigator.pushNamed(context, '/add-class')),
         const SizedBox(width: 12),
-        _quickActionCard(theme, 'الطلاب', LucideIcons.users, Colors.orange, () {}),
+        _quickActionCard(theme, 'الطلاب', LucideIcons.users, Colors.orange, () => Navigator.pushNamed(context, '/teacher-students')),
         const SizedBox(width: 12),
-        _quickActionCard(theme, 'التقارير', LucideIcons.barChart, Colors.purple, () {}),
+        _quickActionCard(theme, 'الملف الشخصي', LucideIcons.user, Colors.purple, () => Navigator.pushNamed(context, '/profile')),
       ],
     );
   }

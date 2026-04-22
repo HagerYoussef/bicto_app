@@ -48,8 +48,22 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     final studentProfile = json['student_profile'] ?? {};
     final grade = studentProfile['grade'] ?? {};
-    final roleValue = json['role'] ?? 'student';
-    final status = json['status'] ?? 'pending';
+    
+    // Improved role detection
+    String? rawRole = json['role']?.toString();
+    String roleValue = (rawRole != null && rawRole.isNotEmpty && rawRole != 'null') ? rawRole : 'student';
+    
+    if (roleValue == 'student') {
+       // If role is student or null, check for teacher-specific fields to infer role
+       if (json['educational_level'] != null || 
+           json['bio'] != null || 
+           (json['cv'] != null && json['cv'].toString().isNotEmpty) ||
+           json['teacher_profile'] != null) {
+         roleValue = 'teacher';
+       }
+    }
+    
+    final status = json['status']?.toString() ?? 'pending';
     
     return UserModel(
       id: int.tryParse(json['id']?.toString() ?? '') ?? 0,

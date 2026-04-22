@@ -6,7 +6,7 @@ abstract class AuthRepository {
   Future<void> register(RegisterRequest request);
   Future<AuthResponse> verifyOtp(String email, String otpCode);
   Future<bool> resendOtp(String email);
-  Future<UserModel> getMe();
+  Future<UserModel> getMe({String? role});
   Future<void> logout();
   Future<List<GradeModel>> getGrades();
   Future<void> sendPasswordOtp(String email);

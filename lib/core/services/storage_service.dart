@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
@@ -32,6 +33,10 @@ class StorageService {
       await _prefs.setString(_studentTokenKey, token);
     } else if (activeRole == 'teacher') {
       await _prefs.setString(_teacherTokenKey, token);
+    } else {
+      // Fallback: save to both if role is unknown to be safe
+      await _prefs.setString(_studentTokenKey, token);
+      await _prefs.setString(_teacherTokenKey, token);
     }
   }
 
@@ -57,7 +62,13 @@ class StorageService {
 
   // Clear all
   Future<void> clearAll() async {
-    await _prefs.clear();
+    debugPrint('🧹 StorageService: Clearing all data...');
+    final success = await _prefs.clear();
+    // Explicitly remove keys just in case clear() has issues on some devices
+    await _prefs.remove(_studentTokenKey);
+    await _prefs.remove(_teacherTokenKey);
+    await _prefs.remove(_roleKey);
+    debugPrint('🧹 StorageService: Clear result: $success');
   }
 
   bool get isLoggedIn => getToken() != null;

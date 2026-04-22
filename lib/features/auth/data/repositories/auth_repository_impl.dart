@@ -39,8 +39,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<UserModel> getMe() {
-    return _dataSource.getMe();
+  Future<UserModel> getMe({String? role}) {
+    return _dataSource.getMe(role: role ?? _storage.getRole());
   }
 
   @override
