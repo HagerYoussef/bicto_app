@@ -130,13 +130,14 @@ class AuthViewModel extends ChangeNotifier {
     _setState(AuthState.loading);
     try {
       await _repository.logout();
-      _currentUser = null;
-      _setState(AuthState.idle);
       return true;
     } catch (e) {
       _errorMessage = e.toString();
-      _setState(AuthState.error);
-      return false;
+      // Even if API logout fails, local clear occurred in repository finally block
+      return true; 
+    } finally {
+      _currentUser = null;
+      _setState(AuthState.idle);
     }
   }
 

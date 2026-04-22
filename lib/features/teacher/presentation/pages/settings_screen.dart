@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:provider/provider.dart';
+import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
 
 class TeacherSettingsScreen extends StatelessWidget {
   const TeacherSettingsScreen({super.key});
@@ -45,6 +47,22 @@ class TeacherSettingsScreen extends StatelessWidget {
               delay: const Duration(milliseconds: 400),
               child: _buildSettingsTile(LucideIcons.helpCircle, 'المساعدة والدعم', () {}),
             ),
+            const SizedBox(height: 12),
+            FadeInDown(
+              delay: const Duration(milliseconds: 500),
+              child: _buildSettingsTile(
+                LucideIcons.logOut, 
+                'تسجيل الخروج', 
+                () async {
+                  final authVm = context.read<AuthViewModel>();
+                  await authVm.logout(context);
+                  if (context.mounted) {
+                    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+                  }
+                },
+                isDestructive: true,
+              ),
+            ),
             const SizedBox(height: 48),
             FadeInUp(
               child: Text(
@@ -58,12 +76,18 @@ class TeacherSettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsTile(IconData icon, String title, VoidCallback onTap) {
+  Widget _buildSettingsTile(IconData icon, String title, VoidCallback onTap, {bool isDestructive = false}) {
     return ListTile(
       onTap: onTap,
-      leading: Icon(icon, color: Colors.blueGrey),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-      trailing: const Icon(LucideIcons.chevronLeft, size: 18),
+      leading: Icon(icon, color: isDestructive ? Colors.red : Colors.blueGrey),
+      title: Text(
+        title, 
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: isDestructive ? Colors.red : null,
+        ),
+      ),
+      trailing: Icon(LucideIcons.chevronLeft, size: 18, color: isDestructive ? Colors.red : null),
       tileColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),

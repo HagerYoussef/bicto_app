@@ -499,6 +499,21 @@ class PlanModel {
   }
 }
 
+class CheckoutResponseModel {
+  final String url;
+  final String tapId;
+
+  CheckoutResponseModel({required this.url, required this.tapId});
+
+  factory CheckoutResponseModel.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] ?? json;
+    return CheckoutResponseModel(
+      url: data['payment_url'] ?? data['url'] ?? '',
+      tapId: data['id']?.toString() ?? data['tap_id']?.toString() ?? '',
+    );
+  }
+}
+
 class SubscriptionSummaryModel {
   final int totalSubscriptions;
   final int totalRemainingClasses;

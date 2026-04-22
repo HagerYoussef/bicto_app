@@ -21,7 +21,8 @@ abstract class StudentRepository {
   // New from Postman
   Future<void> updateProfile(Map<String, dynamic> data);
   Future<List<PlanModel>> getPlans();
-  Future<String?> checkoutPlan(int planId);
+  Future<CheckoutResponseModel?> checkoutPlan(int planId);
+  Future<Map<String, dynamic>> getPaymentStatus(String tapId);
   Future<Map<String, dynamic>> checkEligibility(int classId);
   Future<PaginatedResponse<NotificationModel>> getNotifications({int page, int perPage});
   Future<void> markAllNotificationsAsRead();

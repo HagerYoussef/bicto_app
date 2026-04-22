@@ -85,19 +85,18 @@ class _PackagesScreenState extends State<PackagesScreen> {
 
   Future<void> _handleCheckout(BuildContext context, PlanModel plan) async {
     final vm = context.read<PlansViewModel>();
-    final url = await vm.checkoutPlan(plan.id);
+    final response = await vm.checkoutPlan(plan.id);
     
     if (context.mounted) {
-      if (url != null && url.isNotEmpty) {
-        final uri = Uri.parse(url);
-        final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
-        if (!success && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('فشل فتح رابط الدفع، حاول مرة أخرى'),
-              backgroundColor: Colors.red,
-            ),
-          );
+      if (response != null && response.url.isNotEmpty) {
+        final uri = Uri.parse(response.url);
+        
+        // Open the payment URL
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        
+        // After returning to the app, we can show a dialog or check status
+        if (context.mounted) {
+          _showPaymentStatusDialog(context);
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -108,6 +107,73 @@ class _PackagesScreenState extends State<PackagesScreen> {
         );
       }
     }
+  }
+
+  void _showPaymentStatusDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('تحقق من حالة الدفع', textAlign: TextAlign.center),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('هل أتممت عملية الدفع؟ سنقوم بالتأكد من حالة العملية الآن.'),
+            const SizedBox(height: 24),
+            Consumer<PlansViewModel>(
+              builder: (context, vm, _) {
+                if (vm.isLoading) {
+                  return const CircularProgressIndicator();
+                }
+                return ElevatedButton(
+                  onPressed: () async {
+                    final result = await vm.checkPaymentStatus();
+                    if (context.mounted) {
+                      if (result != null && (result['status'] == 'paid' || result['status'] == 'captured' || result['status'] == 'success')) {
+                        Navigator.pop(context);
+                        _showSuccessDialog(context);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('لم يتم تأكيد الدفع بعد، برجاء المحاولة مرة أخرى إذا كنت قد أتممت العملية')),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('التحقق الآن'),
+                );
+              },
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('إلغاء'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        icon: const Icon(LucideIcons.checkCircle, color: Colors.green, size: 48),
+        title: const Text('تم الاشتراك بنجاح'),
+        content: const Text('مبروك! تم تفعيل الباقة الخاصة بك بنجاح.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // Refresh subscriptions or navigate back
+              context.read<SubscriptionsViewModel>().loadInitialData();
+            },
+            child: const Text('حسناً'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildPackageCard({

@@ -1,32 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
 import 'core/theme.dart';
 import 'core/services/storage_service.dart';
-
 import 'features/auth/data/datasources/auth_remote_datasource.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/presentation/pages/landing_screen.dart';
 import 'features/auth/presentation/viewmodels/auth_viewmodel.dart';
-
 import 'features/student/data/datasources/student_remote_datasource.dart';
 import 'features/student/data/repositories/student_repository_impl.dart';
 import 'features/student/presentation/viewmodels/student_dashboard_viewmodel.dart';
 import 'features/student/presentation/viewmodels/student_viewmodels.dart';
-
 import 'features/teacher/data/datasources/teacher_remote_datasource.dart';
 import 'features/teacher/data/repositories/teacher_repository_impl.dart';
 import 'features/teacher/presentation/viewmodels/teacher_viewmodel.dart';
 import 'features/teacher/data/models/teacher_models.dart';
-
 import 'features/auth/presentation/pages/role_selection_screen.dart';
 import 'features/auth/presentation/pages/login_screen.dart';
 import 'features/auth/presentation/pages/student_signup.dart';
 import 'features/auth/presentation/pages/teacher_signup.dart';
 import 'features/auth/presentation/pages/forgot_password_flow.dart';
 import 'features/auth/presentation/pages/email_verification_screen.dart';
-
 import 'features/student/presentation/pages/student_main_nav.dart';
 import 'features/student/presentation/pages/student_dashboard.dart';
 import 'features/student/presentation/pages/subscriptions_screen.dart';
@@ -37,9 +31,9 @@ import 'features/student/presentation/pages/summaries_screen.dart';
 import 'features/student/presentation/pages/class_details_screen.dart';
 import 'features/student/presentation/pages/payments_screen.dart';
 import 'features/student/presentation/pages/profile_screen.dart';
+import 'features/teacher/presentation/pages/teacher_profile_screen.dart';
 import 'features/student/presentation/pages/assignments_screen.dart';
 import 'features/student/presentation/pages/submission_details_screen.dart';
-
 import 'features/teacher/presentation/pages/teacher_dashboard.dart';
 import 'features/teacher/presentation/pages/classes_screen.dart';
 import 'features/teacher/presentation/pages/add_class_screen.dart';
@@ -57,8 +51,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final storage = await StorageService.getInstance();
-  // Session persistence enabled
-
   final authDataSource = AuthRemoteDataSourceImpl();
   final authRepo = AuthRepositoryImpl(authDataSource, storage);
 
@@ -72,7 +64,6 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel(authRepo)),
-
         ChangeNotifierProvider(create: (_) => StudentDashboardViewModel(studentRepo)),
         ChangeNotifierProvider(create: (_) => BookingsViewModel(studentRepo)),
         ChangeNotifierProvider(create: (_) => PaymentsViewModel(studentRepo)),
@@ -85,7 +76,6 @@ void main() async {
         ChangeNotifierProvider(create: (_) => NotificationsViewModel(studentRepo)),
         ChangeNotifierProvider(create: (_) => PlansViewModel(studentRepo)),
         ChangeNotifierProvider(create: (_) => StudentProfileViewModel(studentRepo)),
-
         ChangeNotifierProvider(create: (_) => TeacherViewModel(teacherRepo)),
         ChangeNotifierProvider(create: (_) => TeacherClassesViewModel(teacherRepo)),
         ChangeNotifierProvider(create: (_) => TeacherAttendanceViewModel(teacherRepo)),
@@ -114,13 +104,11 @@ class EduApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      initialRoute: storage.isLoggedIn ? '/landing' : '/',
+      initialRoute: '/',
       onGenerateRoute: (settings) {
         switch (settings.name) {
-          case '/landing':
-            return MaterialPageRoute(builder: (_) => const LandingScreen());
           case '/':
-            return MaterialPageRoute(builder: (_) => const RoleSelectionScreen());
+            return MaterialPageRoute(builder: (_) => const LandingScreen());
           case '/login':
             final role = settings.arguments as String? ?? 'student';
             return MaterialPageRoute(builder: (_) => LoginScreen(role: role));
@@ -179,7 +167,11 @@ class EduApp extends StatelessWidget {
                         assignmentTitle: mArgs['assignmentTitle'],
                       );
                     case '/payments': return const PaymentsScreen();
-                    case '/profile': return const ProfileScreen();
+                    case '/profile': 
+                      if (authVm.currentUser?.role == 'teacher') {
+                        return const TeacherProfileScreen();
+                      }
+                      return const StudentProfileScreen();
                     default: return const StudentMainNav();
                   }
                 },

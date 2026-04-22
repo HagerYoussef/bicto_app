@@ -8,9 +8,9 @@ import '../../../../shared/widgets/custom_textfield.dart';
 import '../viewmodels/auth_viewmodel.dart';
 
 class LoginScreen extends StatefulWidget {
-  final String role;
+  final String? role;
 
-  const LoginScreen({super.key, required this.role});
+  const LoginScreen({super.key, this.role});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -69,11 +69,10 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isStudent = widget.role == 'student';
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isStudent ? 'دخول الطلاب' : 'دخول المدرسين'),
+        title: const Text('تسجيل الدخول'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -157,31 +156,41 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 FadeInUp(
                   delay: const Duration(milliseconds: 500),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Column(
                     children: [
-                      Text(
-                        isStudent ? 'ليس لديك حساب؟ ' : 'تريد الانضمام لفريقنا؟ ',
-                        style: theme.textTheme.bodyMedium,
+                      const Text(
+                        'ليس لديك حساب؟ سجل الآن كـ',
+                        style: TextStyle(fontSize: 14),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          if (isStudent) {
-                            Navigator.pushNamed(context, '/student-signup');
-                          } else {
-                            Navigator.pushNamed(context, '/teacher-signup');
-                          }
-                        },
-                        child: Text(
-                          'سجل الآن',
-                          style: TextStyle(
-                            color: theme.primaryColor,
-                            fontWeight: FontWeight.bold,
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pushNamed(context, '/student-signup'),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: theme.primaryColor),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: const Text('طالب'),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pushNamed(context, '/teacher-signup'),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: theme.primaryColor),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: const Text('معلم'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

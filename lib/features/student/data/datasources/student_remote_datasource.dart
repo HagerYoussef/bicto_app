@@ -25,7 +25,8 @@ abstract class StudentRemoteDataSource {
   // New from Postman
   Future<void> updateProfile(Map<String, dynamic> data);
   Future<List<PlanModel>> getPlans();
-  Future<String?> checkoutPlan(int planId);
+  Future<CheckoutResponseModel?> checkoutPlan(int planId);
+  Future<Map<String, dynamic>> getPaymentStatus(String tapId);
   Future<Map<String, dynamic>> checkEligibility(int classId);
   Future<PaginatedResponse<NotificationModel>> getNotifications({int page, int perPage});
   Future<void> markAllNotificationsAsRead();
@@ -241,10 +242,20 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
   }
 
   @override
-  Future<String?> checkoutPlan(int planId) async {
+  Future<CheckoutResponseModel?> checkoutPlan(int planId) async {
     try {
       final res = await _dio.post(ApiConstants.studentPlanCheckout(planId));
-      return res.data['data']?['payment_url'] ?? res.data['data']?['url'] ?? res.data['url'] ?? res.data['payment_url'];
+      return CheckoutResponseModel.fromJson(res.data);
+    } catch (e) {
+      throw ErrorHandler.handle(e);
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getPaymentStatus(String tapId) async {
+    try {
+      final res = await _dio.get(ApiConstants.paymentStatus(tapId));
+      return res.data;
     } catch (e) {
       throw ErrorHandler.handle(e);
     }

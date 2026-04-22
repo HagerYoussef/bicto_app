@@ -52,6 +52,7 @@ class ApiConstants {
   static String studentPlanCheckout(int id) => "/api/student/plans/$id/checkout";
   static String studentSubscriptionDetails(int id) => "/api/student/subscriptions/$id";
   static String studentPaymentDetails(int id) => "/api/student/payments/$id";
+  static String paymentStatus(String tapId) => "/api/payment/status/$tapId";
 
   // Teacher
   static const String teacherDashboard = "/api/teacher/dashboard";

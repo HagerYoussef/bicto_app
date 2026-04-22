@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Colors for Light Theme
   static const Color primaryLight = Colors.white;
   static const Color secondaryLight = Color(0xFFF8FAFC);
   static const Color textMainLight = Color(0xFF1E293B);
   static const Color textSecondaryLight = Color(0xFF64748B);
 
-  // Colors for Dark Theme
   static const Color primaryDark = Color(0xFF0F172A);
   static const Color secondaryDark = Color(0xFF1E293B);
   static const Color textMainDark = Color(0xFFF8FAFC);
@@ -47,11 +45,13 @@ class AppTheme {
         ),
         iconTheme: IconThemeData(color: textMainLight),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: Colors.white,
         elevation: 4,
         shadowColor: Colors.black.withOpacity(0.05),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
     );
   }
@@ -86,10 +86,12 @@ class AppTheme {
         ),
         iconTheme: IconThemeData(color: textMainDark),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: secondaryDark,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
     );
   }

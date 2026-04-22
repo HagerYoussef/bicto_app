@@ -4,12 +4,10 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../../../auth/data/models/auth_models.dart';
-import '../viewmodels/student_viewmodels.dart';
+import '../../presentation/viewmodels/teacher_viewmodel.dart';
 
-
-class StudentProfileScreen extends StatelessWidget {
-  const StudentProfileScreen({super.key});
+class TeacherProfileScreen extends StatelessWidget {
+  const TeacherProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +46,16 @@ class StudentProfileScreen extends StatelessWidget {
                       _genderLabel(user?.gender)),
                 ]),
                 const SizedBox(height: 24),
-                _buildSection(theme, 'المعلومات الدراسية', [
-                  _infoTile(theme, LucideIcons.graduationCap, 'المستوى التعليمي',
+                if (user?.bio != null && user!.bio!.isNotEmpty)
+                  _buildSection(theme, 'النبذة الشخصية', [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(user.bio!, style: const TextStyle(height: 1.5)),
+                    ),
+                  ]),
+                if (user?.bio != null && user!.bio!.isNotEmpty) const SizedBox(height: 24),
+                _buildSection(theme, 'المرحلة التعليمية', [
+                  _infoTile(theme, LucideIcons.graduationCap, 'المرحلة المستهدفة',
                       user?.formattedEducationalLevel ?? '—'),
                 ]),
                 const SizedBox(height: 32),
@@ -93,7 +99,7 @@ class StudentProfileScreen extends StatelessWidget {
   }
 
   Widget _buildProfileHeader(ThemeData theme, UserModel? user) {
-    final name = user?.fullName ?? 'المستخدم';
+    final name = user?.fullName ?? 'المعلم';
     final avatarUrl = user?.avatarUrl;
     return FadeInDown(
       child: Column(
@@ -138,7 +144,7 @@ class StudentProfileScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Text(name, style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold)),
-          Text('طالب', style: theme.textTheme.bodyMedium?.copyWith(
+          Text('معلم', style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.hintColor)),
         ],
       ),
@@ -185,7 +191,7 @@ class StudentProfileScreen extends StatelessWidget {
 
   void _showEditProfile(BuildContext context) {
     final authVm = context.read<AuthViewModel>();
-    final studentProfileVm = context.read<StudentProfileViewModel>();
+    final teacherVm = context.read<TeacherViewModel>();
     final user = authVm.currentUser;
 
     if (user == null) return;
@@ -194,8 +200,9 @@ class StudentProfileScreen extends StatelessWidget {
     final lastNameController = TextEditingController(text: user.lastName);
     final phoneController = TextEditingController(text: user.phone);
     final emailController = TextEditingController(text: user.email);
+    final bioController = TextEditingController(text: user.bio);
     String selectedGender = user.gender ?? 'male';
-    int selectedGrade = user.gradeId ?? 1;
+    int selectedStage = user.educationalLevel ?? 1;
 
     showModalBottomSheet(
       context: context,
@@ -213,7 +220,7 @@ class StudentProfileScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('تعديل الملف الشخصي', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                Text('تعديل الملف الشخصي (معلم)', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 24),
                 TextField(
                   controller: firstNameController,
@@ -255,14 +262,24 @@ class StudentProfileScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
+                TextField(
+                  controller: bioController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'النبذة التعريفية (Bio)',
+                    prefixIcon: Icon(LucideIcons.pencil),
+                    hintText: 'اكتب نبذة عن خبرتك التعليمية...',
+                  ),
+                ),
+                const SizedBox(height: 16),
                 DropdownButtonFormField<int>(
-                  value: authVm.grades.any((g) => g.id == selectedGrade) ? selectedGrade : (authVm.grades.isNotEmpty ? authVm.grades.first.id : null),
-                  decoration: const InputDecoration(labelText: 'المستوى التعليمي', prefixIcon: Icon(LucideIcons.graduationCap)),
-                  items: authVm.grades.map((grade) => DropdownMenuItem(
-                    value: grade.id,
-                    child: Text(grade.displayName),
+                  value: authVm.stages.any((s) => s.id == selectedStage) ? selectedStage : (authVm.stages.isNotEmpty ? authVm.stages.first.id : null),
+                  decoration: const InputDecoration(labelText: 'المرحلة التعليمية', prefixIcon: Icon(LucideIcons.layers)),
+                  items: authVm.stages.map((stage) => DropdownMenuItem(
+                    value: stage.id,
+                    child: Text(stage.name),
                   )).toList(),
-                  onChanged: (v) => setModalState(() => selectedGrade = v ?? 1),
+                  onChanged: (v) => setModalState(() => selectedStage = v ?? 1),
                 ),
 
                 const SizedBox(height: 32),
@@ -274,10 +291,11 @@ class StudentProfileScreen extends StatelessWidget {
                       'email': emailController.text.trim(),
                       'phone': phoneController.text.trim(),
                       'gender': selectedGender,
-                      'grade_id': selectedGrade,
+                      'bio': bioController.text.trim(),
+                      'educational_level': selectedStage,
                     };
 
-                    bool success = await studentProfileVm.updateProfile(data);
+                    bool success = await teacherVm.updateProfile(data);
 
                     if (success) {
                       await authVm.loadCurrentUser();
@@ -286,14 +304,14 @@ class StudentProfileScreen extends StatelessWidget {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(studentProfileVm.error ?? 'فشل التحديث'),
+                            content: Text(teacherVm.error ?? 'فشل التحديث'),
                             backgroundColor: Colors.red,
                           ),
                         );
                       }
                     }
                   },
-                  child: studentProfileVm.isLoading
+                  child: teacherVm.isLoading
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Text('حفظ التغييرات'),
                 ),
@@ -380,4 +398,3 @@ class StudentProfileScreen extends StatelessWidget {
     );
   }
 }
-

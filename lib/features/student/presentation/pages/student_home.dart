@@ -140,6 +140,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: TextField(
+                    onChanged: (value) {
+                      context.read<SubjectsViewModel>().setSearchQuery(value);
+                    },
                     decoration: InputDecoration(
                       hintText: 'ابحث عن مادة أو مدرس...',
                       border: InputBorder.none,
@@ -214,7 +217,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           return const Center(child: Text('لا توجد مواد دراسية متوفرة حالياً'));
         }
 
-        // We cycle through predefined UI colors/icons securely since dynamic API might not provide them
         final List<Map<String, dynamic>> predefinedStyles = [
           {'icon': LucideIcons.calculator, 'color': Colors.blue},
           {'icon': LucideIcons.atom, 'color': Colors.purple},

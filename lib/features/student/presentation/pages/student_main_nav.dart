@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
+import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'student_home.dart';
 import 'teachers_list_screen.dart';
 import 'packages_screen.dart';
@@ -76,9 +78,13 @@ class _StudentMainNavState extends State<StudentMainNav> {
         backgroundColor: theme.primaryColor.withOpacity(0.1),
         child: Icon(LucideIcons.user, size: 20, color: theme.primaryColor),
       ),
-      onSelected: (value) {
+      onSelected: (value) async {
         if (value == 'logout') {
-          Navigator.pushReplacementNamed(context, '/');
+          final authVm = context.read<AuthViewModel>();
+          await authVm.logout(context);
+          if (mounted) {
+            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+          }
         } else {
           Navigator.pushNamed(context, '/$value');
         }

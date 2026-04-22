@@ -188,15 +188,25 @@ class SubjectsViewModel extends ChangeNotifier {
   ViewState _state = ViewState.idle;
   String? _error;
   List<SubjectModel> _subjects = [];
+  String _searchQuery = '';
 
   ViewState get state => _state;
   String? get error => _error;
-  List<SubjectModel> get subjects => _subjects;
+  List<SubjectModel> get subjects {
+    if (_searchQuery.isEmpty) return _subjects;
+    return _subjects.where((s) => s.title.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+  }
   bool get isLoading => _state == ViewState.loading;
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
 
   Future<void> fetchSubjects({int? gradeId}) async {
     _state = ViewState.loading;
     _error = null;
+    _searchQuery = '';
     notifyListeners();
 
     try {
@@ -254,6 +264,9 @@ class PlansViewModel extends ChangeNotifier {
   List<PlanModel> _plans = [];
   List<PlanModel> get plans => _plans;
 
+  String? _lastTapId;
+  String? get lastTapId => _lastTapId;
+
   Future<void> fetchPlans() async {
     _isLoading = true;
     notifyListeners();
@@ -266,12 +279,29 @@ class PlansViewModel extends ChangeNotifier {
     }
   }
 
-  Future<String?> checkoutPlan(int planId) async {
+  Future<CheckoutResponseModel?> checkoutPlan(int planId) async {
+    _isLoading = true;
+    _lastTapId = null;
+    notifyListeners();
+    try {
+      final response = await _repository.checkoutPlan(planId);
+      _lastTapId = response?.tapId;
+      return response;
+    } catch (_) {
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Map<String, dynamic>?> checkPaymentStatus() async {
+    if (_lastTapId == null) return null;
     _isLoading = true;
     notifyListeners();
     try {
-      final url = await _repository.checkoutPlan(planId);
-      return url;
+      final status = await _repository.getPaymentStatus(_lastTapId!);
+      return status;
     } catch (_) {
       return null;
     } finally {

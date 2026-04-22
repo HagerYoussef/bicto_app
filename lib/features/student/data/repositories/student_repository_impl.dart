@@ -67,7 +67,10 @@ class StudentRepositoryImpl implements StudentRepository {
   Future<List<PlanModel>> getPlans() => _dataSource.getPlans();
 
   @override
-  Future<String?> checkoutPlan(int planId) => _dataSource.checkoutPlan(planId);
+  Future<CheckoutResponseModel?> checkoutPlan(int planId) => _dataSource.checkoutPlan(planId);
+  
+  @override
+  Future<Map<String, dynamic>> getPaymentStatus(String tapId) => _dataSource.getPaymentStatus(tapId);
 
   @override
   Future<Map<String, dynamic>> checkEligibility(int classId) => _dataSource.checkEligibility(classId);
