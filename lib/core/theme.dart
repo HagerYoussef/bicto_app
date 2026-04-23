@@ -45,7 +45,7 @@ class AppTheme {
         ),
         iconTheme: IconThemeData(color: textMainLight),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: Colors.white,
         elevation: 4,
         shadowColor: Colors.black.withOpacity(0.05),
@@ -86,7 +86,7 @@ class AppTheme {
         ),
         iconTheme: IconThemeData(color: textMainDark),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: secondaryDark,
         elevation: 0,
         shape: RoundedRectangleBorder(

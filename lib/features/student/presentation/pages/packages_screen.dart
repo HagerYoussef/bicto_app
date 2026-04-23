@@ -6,6 +6,7 @@ import '../../../../core/constants.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/student_models.dart';
 import '../viewmodels/student_viewmodels.dart';
+import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
 
 class PackagesScreen extends StatefulWidget {
   const PackagesScreen({super.key});
@@ -130,7 +131,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
                   onPressed: () async {
                     final result = await vm.checkPaymentStatus();
                     if (context.mounted) {
-                      if (result != null && (result['status'] == 'paid' || result['status'] == 'captured' || result['status'] == 'success')) {
+                      if (result != null && (result['status'] == 'paid' || result['status'] == 'captured' || result['status'] == 'success' || result['status'] == 'completed')) {
                         Navigator.pop(context);
                         _showSuccessDialog(context);
                       } else {
@@ -157,17 +158,33 @@ class _PackagesScreenState extends State<PackagesScreen> {
   void _showSuccessDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         icon: const Icon(LucideIcons.checkCircle, color: Colors.green, size: 48),
         title: const Text('تم الاشتراك بنجاح'),
         content: const Text('مبروك! تم تفعيل الباقة الخاصة بك بنجاح.'),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Refresh subscriptions or navigate back
-              context.read<SubscriptionsViewModel>().loadInitialData();
+            onPressed: () async {
+              // Close success dialog
+              Navigator.pop(dialogContext);
+              
+              // Refresh critical data across the app
+              if (context.mounted) {
+                // 1. Refresh User Profile (Role/Subscription Status)
+                await context.read<AuthViewModel>().loadCurrentUser();
+                
+                // 2. Refresh Subscriptions List
+                if (context.mounted) {
+                  context.read<SubscriptionsViewModel>().loadInitialData();
+                }
+                
+                // 3. Optional: Go back or refresh plans
+                if (context.mounted) {
+                  context.read<PlansViewModel>().fetchPlans();
+                }
+              }
             },
             child: const Text('حسناً'),
           ),
